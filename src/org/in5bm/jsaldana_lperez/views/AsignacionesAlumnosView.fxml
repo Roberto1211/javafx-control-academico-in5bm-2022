@@ -35,7 +35,7 @@
                         </ImageView>
                         <Pane id="PaneEntidad" layoutX="22.0" layoutY="-15.0" prefHeight="236.0" prefWidth="190.0">
                            <children>
-                              <Label id="lblEntidad" alignment="CENTER" layoutX="30.0" layoutY="7.0" prefHeight="0.0" prefWidth="131.0" text="Asignacion">
+                              <Label id="lblEntidad" alignment="CENTER" layoutX="24.0" layoutY="7.0" prefHeight="56.0" prefWidth="142.0" text="Asignacion">
                                  <font>
                                     <Font name="Franklin Gothic Medium Cond" size="30.0" />
                                  </font>

@@ -5,6 +5,7 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Timestamp;
+import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.Optional;
 import java.util.ResourceBundle;
@@ -42,8 +43,9 @@ import java.time.LocalDateTime;
  *
  * Código técnico: IN5BM
  */
-
 public class AsignacionesAlumnosController implements Initializable {
+
+    private final String PAQUETE_IMAGES = "org/in5bm/jsaldana_lperez/resources/images/";
 
     @FXML
     private Button btnNuevo;
@@ -103,8 +105,6 @@ public class AsignacionesAlumnosController implements Initializable {
     }
 
     private Operacion operacion = Operacion.NINGUNO;
-
-    private final String PAQUETE_IMAGES = "org/in5bm/jsaldana_lperez/resources/images/";
 
     private ObservableList<Alumnos> listaObservableAlumnos;
     private ObservableList<Cursos> listaObservableCursos;
@@ -430,12 +430,10 @@ public class AsignacionesAlumnosController implements Initializable {
     }
 
     private boolean agregarAsignacion() {
-        String validacionAlumno= String.valueOf(cmbAlumno.getValue());
-        String validacionCurso= String.valueOf(cmbCurso.getValue());
-        
-        if (!(dpkFechaAsignacion.getEditor().getText().isEmpty() || validacionAlumno.equals("null")
-                || validacionCurso.equals("null"))) {
-
+        if (dpkFechaAsignacion.getEditor().getText().isEmpty()) {
+            dpkFechaAsignacion.setValue(LocalDate.now());
+        }
+        if (!(cmbAlumno.getValue() == null || cmbCurso.getValue() == null)) {
             AsignacionesAlumnos asignacion = new AsignacionesAlumnos();
 
             asignacion.setAlumnoId(((Alumnos) cmbAlumno.getSelectionModel().getSelectedItem()).getCarne());
@@ -447,8 +445,7 @@ public class AsignacionesAlumnosController implements Initializable {
             PreparedStatement pstmt = null;
 
             try {
-                pstmt = Conexion.getInstance().getConexion()
-                        .prepareCall("{CALL sp_asignaciones_alumnos_create(?, ?, ?)}");
+                pstmt = Conexion.getInstance().getConexion().prepareCall("{CALL sp_asignaciones_alumnos_create(?, ?, ?)}");
 
                 pstmt.setString(1, asignacion.getAlumnoId());
                 pstmt.setInt(2, asignacion.getCursoId());
@@ -478,6 +475,8 @@ public class AsignacionesAlumnosController implements Initializable {
         } else {
             Alert alert = new Alert(Alert.AlertType.WARNING);
             alert.setTitle("Control academico");
+            Stage stageAlert = (Stage) alert.getDialogPane().getScene().getWindow();
+            stageAlert.getIcons().add(new Image(PAQUETE_IMAGES + "informacion.png"));
             alert.setHeaderText(null);
             alert.setContentText("Antes de continuar rellene todos los campos");
             alert.show();
@@ -486,6 +485,9 @@ public class AsignacionesAlumnosController implements Initializable {
     }
 
     private boolean actualizarAsignacion() {
+        if (dpkFechaAsignacion.getEditor().getText().isEmpty()) {
+            dpkFechaAsignacion.setValue(LocalDate.now());
+        }
         if (existeElementoSeleccionado()) {
             AsignacionesAlumnos asignacion = new AsignacionesAlumnos();
             asignacion.setId(Integer.valueOf(txtId.getText()));
@@ -648,31 +650,31 @@ public class AsignacionesAlumnosController implements Initializable {
                 } else {
                     Alert alert = new Alert(Alert.AlertType.WARNING);
                     alert.setTitle("Control Académico Kinal");
+                    Stage stageAlert = (Stage) alert.getDialogPane().getScene().getWindow();
+                    stageAlert.getIcons().add(new Image(PAQUETE_IMAGES + "informacion.png"));
                     alert.setHeaderText(null);
                     alert.setContentText("Antes de continuar, seleccione un registro");
                     alert.show();
                 }
                 break;
             case GUARDAR:
-                btnNuevo.setText("Nuevo");
-                imgNuevo.setImage(new Image(PAQUETE_IMAGES + "Agregar.png"));
+                tblAsignacionesAlumnos.setDisable(false);
                 btnModificar.setText("Modificar");
                 imgModificar.setImage(new Image(PAQUETE_IMAGES + "Editar.png"));
-
-                btnEliminar.setDisable(false);
+                btnNuevo.setText("nuevo");
+                imgNuevo.setImage(new Image(PAQUETE_IMAGES + "Agregar.png"));
                 btnEliminar.setVisible(true);
-                imgEliminar.setVisible(true);
-                imgEliminar.setDisable(false);
-
-                btnReporte.setDisable(false);
                 btnReporte.setVisible(true);
                 imgReporte.setVisible(true);
+                imgEliminar.setVisible(true);
+                btnEliminar.setDisable(false);
+                btnReporte.setDisable(false);
                 imgReporte.setDisable(false);
-
+                imgEliminar.setDisable(false);
+                imgReporte.setDisable(false);
                 limpiarCampos();
                 deshabilitarCampos();
-                tblAsignacionesAlumnos.setDisable(false);
-
+                tblAsignacionesAlumnos.getSelectionModel().clearSelection();
                 operacion = Operacion.NINGUNO;
                 break;
             case Modificar:
@@ -693,7 +695,7 @@ public class AsignacionesAlumnosController implements Initializable {
                         imgModificar.setImage(new Image(PAQUETE_IMAGES + "Editar.png"));
 
                         btnEliminar.setText("Eliminar");
-                        imgEliminar.setImage(new Image(PAQUETE_IMAGES + "eliminar2.png"));
+                        imgEliminar.setImage(new Image(PAQUETE_IMAGES + "eliminar.png"));
                         btnEliminar.setDisable(false);
                         btnEliminar.setVisible(true);
                         imgReporte.setVisible(true);
@@ -741,11 +743,13 @@ public class AsignacionesAlumnosController implements Initializable {
                 if (existeElementoSeleccionado()) {
                     Alert alertConfirm = new Alert(Alert.AlertType.CONFIRMATION);
                     alertConfirm.setTitle("Control Académico Kinal");
+                    Stage stageAlert = (Stage) alertConfirm.getDialogPane().getScene().getWindow();
+                    stageAlert.getIcons().add(new Image(PAQUETE_IMAGES + "informacion.png"));
                     alertConfirm.setHeaderText(null);
                     alertConfirm.setContentText("¿Está seguro que desea eliminar el registro seleccionado?");
 
                     Stage stage = (Stage) alertConfirm.getDialogPane().getScene().getWindow();
-                    stage.getIcons().add(new Image(PAQUETE_IMAGES + "logo.png"));
+                    stage.getIcons().add(new Image(PAQUETE_IMAGES + "informacion.png"));
 
                     Optional<ButtonType> result = alertConfirm.showAndWait();
                     if (result.get().equals(ButtonType.OK)) {
@@ -756,6 +760,7 @@ public class AsignacionesAlumnosController implements Initializable {
 
                             Alert alertInformation = new Alert(Alert.AlertType.INFORMATION);
                             alertInformation.setTitle("Control Académico Kinal");
+                            stage.getIcons().add(new Image(PAQUETE_IMAGES + "informacion.png"));
                             alertInformation.setHeaderText(null);
                             alertInformation.setContentText("Registro eliminado exitosamente");
                             alertInformation.show();
@@ -768,6 +773,8 @@ public class AsignacionesAlumnosController implements Initializable {
                 } else {
                     Alert alert = new Alert(Alert.AlertType.WARNING);
                     alert.setTitle("Control Académico Kinal");
+                    Stage stageAlert = (Stage) alert.getDialogPane().getScene().getWindow();
+                    stageAlert.getIcons().add(new Image(PAQUETE_IMAGES + "informacion.png"));
                     alert.setHeaderText(null);
                     alert.setContentText("Antes de continuar, seleccione un registro");
                     alert.show();
@@ -783,7 +790,7 @@ public class AsignacionesAlumnosController implements Initializable {
         alerta.setHeaderText(null);
         alerta.setContentText("Esta funcionalidad solo está disponible en la versión PRO");
         Stage stageAlert = (Stage) alerta.getDialogPane().getScene().getWindow();
-        stageAlert.getIcons().add(new Image(PAQUETE_IMAGES + "logo.png"));
+        stageAlert.getIcons().add(new Image(PAQUETE_IMAGES + "informacion.png"));
         alerta.show();
     }
 

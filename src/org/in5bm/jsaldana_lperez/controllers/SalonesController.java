@@ -14,6 +14,8 @@ import javafx.fxml.Initializable;
 import javafx.scene.control.Alert;
 import javafx.scene.control.Button;
 import javafx.scene.control.ButtonType;
+import javafx.scene.control.Spinner;
+import javafx.scene.control.SpinnerValueFactory;
 import javafx.scene.control.TextField;
 import javafx.scene.control.cell.PropertyValueFactory;
 import javafx.scene.image.Image;
@@ -35,7 +37,6 @@ import org.in5bm.jsaldana_lperez.system.Principal;
  *
  * Código técnico: IN5BM
  */
-
 public class SalonesController implements Initializable {
 
     private final String PAQUETE_IMAGE = "org/in5bm/jsaldana_lperez/resources/images/";
@@ -55,13 +56,15 @@ public class SalonesController implements Initializable {
     TextField txtDescripcion;
 
     @FXML
-    TextField txtCapacidadMax;
-
-    @FXML
     TextField txtEdificio;
 
     @FXML
-    TextField txtNivel;
+    private Spinner<Integer> spnNivel;
+    private SpinnerValueFactory<Integer> valueFactoryCiclo;
+
+    @FXML
+    private Spinner<Integer> spnCapacidadMax;
+    private SpinnerValueFactory<Integer> valueFactoryMaximo;
 
     @FXML
     Button btnNuevo;
@@ -110,6 +113,12 @@ public class SalonesController implements Initializable {
 
     @Override
     public void initialize(URL location, ResourceBundle resources) {
+        valueFactoryCiclo = new SpinnerValueFactory.IntegerSpinnerValueFactory(0, 2050, 2022);
+        spnCapacidadMax.setValueFactory(valueFactoryCiclo);
+
+        valueFactoryMaximo = new SpinnerValueFactory.IntegerSpinnerValueFactory(0, 2050, 2022);
+        spnNivel.setValueFactory(valueFactoryMaximo);
+
         cargarDatos();
     }
 
@@ -131,9 +140,9 @@ public class SalonesController implements Initializable {
         if (existeElementoSeleccionado()) {
             txtCodigoSalon.setText(((Salones) tblSalones.getSelectionModel().getSelectedItem()).getCodigoSalon());
             txtDescripcion.setText(((Salones) tblSalones.getSelectionModel().getSelectedItem()).getDescripcion());
-            txtCapacidadMax.setText(String.valueOf(((Salones) tblSalones.getSelectionModel().getSelectedItem()).getCapacidadMaxima()));
+            spnNivel.getValueFactory().setValue(((Salones) tblSalones.getSelectionModel().getSelectedItem()).getNivel());
             txtEdificio.setText(((Salones) tblSalones.getSelectionModel().getSelectedItem()).getEdificio());
-            txtNivel.setText(String.valueOf(((Salones) tblSalones.getSelectionModel().getSelectedItem()).getNivel()));
+            spnCapacidadMax.getValueFactory().setValue(((Salones) tblSalones.getSelectionModel().getSelectedItem()).getCapacidadMaxima());
         }
     }
 
@@ -143,6 +152,8 @@ public class SalonesController implements Initializable {
 
             Alert confirm = new Alert(Alert.AlertType.CONFIRMATION);
             confirm.setTitle("Control Académico Kinal");
+            Stage stageAlert = (Stage) confirm.getDialogPane().getScene().getWindow();
+            stageAlert.getIcons().add(new Image("org/in5bm/jsaldana_lperez/resources/images/informacion.png"));
             confirm.setHeaderText(null);
             confirm.setContentText("Esta apunto de eliminar el registro con los siguientes datos: "
                     + "\n" + salon.getCodigoSalon() + " || " + salon.getEdificio()
@@ -225,37 +236,35 @@ public class SalonesController implements Initializable {
     private void deshabilitarCampos() {
         txtCodigoSalon.setEditable(false);
         txtDescripcion.setEditable(false);
-        txtCapacidadMax.setEditable(false);
+        spnCapacidadMax.setEditable(false);
         txtEdificio.setEditable(false);
-        txtNivel.setEditable(false);
+        spnNivel.setEditable(false);
 
         txtCodigoSalon.setDisable(true);
         txtDescripcion.setDisable(true);
-        txtCapacidadMax.setDisable(true);
+        spnCapacidadMax.setDisable(true);
         txtEdificio.setDisable(true);
-        txtNivel.setDisable(true);
+        spnNivel.setDisable(true);
     }
 
     private void habilitarCampos() {
         txtCodigoSalon.setEditable(false);
         txtDescripcion.setEditable(true);
-        txtCapacidadMax.setEditable(true);
         txtEdificio.setEditable(true);
-        txtNivel.setEditable(true);
 
         txtCodigoSalon.setDisable(true);
         txtDescripcion.setDisable(false);
-        txtCapacidadMax.setDisable(false);
+        spnCapacidadMax.setDisable(false);
         txtEdificio.setDisable(false);
-        txtNivel.setDisable(false);
+        spnNivel.setDisable(false);
     }
 
     private void limpiarCampos() {
         txtCodigoSalon.setText("");
         txtDescripcion.setText("");
-        txtCapacidadMax.setText("");
+        spnCapacidadMax.getValueFactory().setValue(0);
         txtEdificio.setText("");
-        txtNivel.setText("");
+        spnNivel.getValueFactory().setValue(0);
     }
 
     @FXML
@@ -308,63 +317,53 @@ public class SalonesController implements Initializable {
         }
     }
 
-    private boolean validarNumeros(String numero1, String numero2) {
-        return numero1.matches("[0-9]*") && numero2.matches("[0-9]*");
-    }
-
     private boolean agregarSalon() {
-        if (!(txtCodigoSalon.getText().equals("") || txtCapacidadMax.getText().equals("") || txtNivel.getText().equals(""))) {
-            if (!(txtCodigoSalon.getText().charAt(0) == ' ' || txtCapacidadMax.getText().charAt(0) == ' ' || txtNivel.getText().charAt(0) == ' ')) {
+        if (!(txtCodigoSalon.getText().equals(""))) {
+            if (!(txtCodigoSalon.getText().charAt(0) == ' ')) {
                 if (!(txtCodigoSalon.getText().length() >= 6 || txtDescripcion.getText().length() >= 46 || txtEdificio.getText().length() >= 16)) {
-                    if (validarNumeros(txtCapacidadMax.getText(), txtNivel.getText())) {
 
-                        Salones salon = new Salones();
-                        salon.setCodigoSalon(txtCodigoSalon.getText());
-                        salon.setDescripcion(txtDescripcion.getText());
-                        salon.setCapacidadMaxima(Integer.valueOf(txtCapacidadMax.getText()));
-                        salon.setEdificio(txtEdificio.getText());
-                        salon.setNivel(Integer.valueOf(txtNivel.getText()));
+                    Salones salon = new Salones();
+                    salon.setCodigoSalon(txtCodigoSalon.getText());
+                    salon.setDescripcion(txtDescripcion.getText());
+                    salon.setCapacidadMaxima(spnCapacidadMax.getValue());
+                    salon.setEdificio(txtEdificio.getText());
+                    salon.setNivel(spnNivel.getValue());
 
-                        PreparedStatement pstmt = null;
+                    PreparedStatement pstmt = null;
 
+                    try {
+                        pstmt = Conexion.getInstance().getConexion().prepareCall("Call sp_salones_create(?, ?, ?, ?, ?)");
+
+                        System.out.println(pstmt.toString());
+
+                        pstmt.setString(1, salon.getCodigoSalon());
+                        pstmt.setString(2, salon.getDescripcion());
+                        pstmt.setInt(3, salon.getCapacidadMaxima());
+                        pstmt.setString(4, salon.getEdificio());
+                        pstmt.setInt(5, salon.getNivel());
+                        pstmt.execute();
+                        cargarDatos();
+                        return true;
+
+                    } catch (SQLException e) {
+                        System.err.println("Se produjo un error al intentar insertar el siguiente registro: " + salon.toString());
+                        e.printStackTrace();
+                    } catch (Exception e) {
+                        e.printStackTrace();
+                    } finally {
                         try {
-                            pstmt = Conexion.getInstance().getConexion().prepareCall("Call sp_salones_create(?, ?, ?, ?, ?)");
-
-                            System.out.println(pstmt.toString());
-
-                            pstmt.setString(1, salon.getCodigoSalon());
-                            pstmt.setString(2, salon.getDescripcion());
-                            pstmt.setInt(3, salon.getCapacidadMaxima());
-                            pstmt.setString(4, salon.getEdificio());
-                            pstmt.setInt(5, salon.getNivel());
-                            pstmt.execute();
-                            cargarDatos();
-                            return true;
-
-                        } catch (SQLException e) {
-                            System.err.println("Se produjo un error al intentar insertar el siguiente registro: " + salon.toString());
-                            e.printStackTrace();
+                            if (pstmt != null) {
+                                pstmt.close();
+                            }
                         } catch (Exception e) {
                             e.printStackTrace();
-                        } finally {
-                            try {
-                                if (pstmt != null) {
-                                    pstmt.close();
-                                }
-                            } catch (Exception e) {
-                                e.printStackTrace();
-                            }
                         }
-                    } else {
-                        Alert alert = new Alert(Alert.AlertType.WARNING);
-                        alert.setTitle("Control academico");
-                        alert.setHeaderText(null);
-                        alert.setContentText("Tipo de dato no valido en capacidad maxima o nivel");
-                        alert.show();
                     }
                 } else {
                     Alert alert = new Alert(Alert.AlertType.WARNING);
                     alert.setTitle("Control academico");
+                    Stage stageAlert = (Stage) alert.getDialogPane().getScene().getWindow();
+                    stageAlert.getIcons().add(new Image("org/in5bm/jsaldana_lperez/resources/images/informacion.png"));
                     alert.setHeaderText(null);
                     alert.setContentText("Limite de caracteres excedido");
                     alert.show();
@@ -372,6 +371,8 @@ public class SalonesController implements Initializable {
             } else {
                 Alert alert = new Alert(Alert.AlertType.WARNING);
                 alert.setTitle("Control academico");
+                Stage stageAlert = (Stage) alert.getDialogPane().getScene().getWindow();
+                stageAlert.getIcons().add(new Image("org/in5bm/jsaldana_lperez/resources/images/informacion.png"));
                 alert.setHeaderText(null);
                 alert.setContentText("Verifique que los campos no contengan un espacio al inicio");
                 alert.show();
@@ -379,6 +380,8 @@ public class SalonesController implements Initializable {
         } else {
             Alert alert = new Alert(Alert.AlertType.WARNING);
             alert.setTitle("Control academico");
+            Stage stageAlert = (Stage) alert.getDialogPane().getScene().getWindow();
+            stageAlert.getIcons().add(new Image("org/in5bm/jsaldana_lperez/resources/images/informacion.png"));
             alert.setHeaderText(null);
             alert.setContentText("Antes de continuar rellene todos los campos");
             alert.show();
@@ -410,6 +413,8 @@ public class SalonesController implements Initializable {
                 } else {
                     Alert alert = new Alert(Alert.AlertType.WARNING);
                     alert.setTitle("Control academico");
+                    Stage stageAlert = (Stage) alert.getDialogPane().getScene().getWindow();
+                    stageAlert.getIcons().add(new Image("org/in5bm/jsaldana_lperez/resources/images/informacion.png"));
                     alert.setHeaderText(null);
                     alert.setContentText("Antes de continuar selecciona un registro");
                     alert.show();
@@ -464,56 +469,50 @@ public class SalonesController implements Initializable {
     }
 
     private boolean actualizarSalon() {
-        if (!(txtCodigoSalon.getText().equals("") || txtCapacidadMax.getText().equals("") || txtNivel.getText().equals(""))) {
-            if (!(txtCodigoSalon.getText().charAt(0) == ' ' || txtCapacidadMax.getText().charAt(0) == ' ' || txtNivel.getText().charAt(0) == ' ')) {
+        if (!(txtCodigoSalon.getText().equals(""))) {
+            if (!(txtCodigoSalon.getText().charAt(0) == ' ')) {
                 if (!(txtCodigoSalon.getText().length() >= 6 || txtDescripcion.getText().length() >= 46 || txtEdificio.getText().length() >= 16)) {
-                    if (validarNumeros(txtCapacidadMax.getText(), txtNivel.getText())) {
-                        Salones salon = new Salones();
-                        salon.setCodigoSalon(txtCodigoSalon.getText());
-                        salon.setDescripcion(txtDescripcion.getText());
-                        salon.setCapacidadMaxima(Integer.valueOf(txtCapacidadMax.getText()));
-                        salon.setEdificio(txtEdificio.getText());
-                        salon.setNivel(Integer.valueOf(txtNivel.getText()));
+                    Salones salon = new Salones();
+                    salon.setCodigoSalon(txtCodigoSalon.getText());
+                    salon.setDescripcion(txtDescripcion.getText());
+                    salon.setCapacidadMaxima(spnCapacidadMax.getValue());
+                    salon.setEdificio(txtEdificio.getText());
+                    salon.setNivel(spnNivel.getValue());
 
-                        PreparedStatement pstmt = null;
+                    PreparedStatement pstmt = null;
 
+                    try {
+                        pstmt = Conexion.getInstance().getConexion().prepareCall("Call sp_salones_update(?, ?, ?, ?, ?)");
+                        pstmt.setString(1, salon.getCodigoSalon());
+                        pstmt.setString(2, salon.getDescripcion());
+                        pstmt.setString(3, String.valueOf(salon.getCapacidadMaxima()));
+                        pstmt.setString(4, salon.getEdificio());
+                        pstmt.setString(5, String.valueOf(salon.getNivel()));
+
+                        System.out.println(pstmt.toString());
+
+                        pstmt.execute();
+
+                        return true;
+                    } catch (SQLException e) {
+                        System.out.println("Se produjo un error al intentar actualizar el siguiente registro: " + salon.toString());
+                        e.printStackTrace();
+                    } catch (Exception e) {
+                        e.printStackTrace();
+                    } finally {
                         try {
-                            pstmt = Conexion.getInstance().getConexion().prepareCall("Call sp_salones_update(?, ?, ?, ?, ?)");
-                            pstmt.setString(1, salon.getCodigoSalon());
-                            pstmt.setString(2, salon.getDescripcion());
-                            pstmt.setString(3, String.valueOf(salon.getCapacidadMaxima()));
-                            pstmt.setString(4, salon.getEdificio());
-                            pstmt.setString(5, String.valueOf(salon.getNivel()));
-
-                            System.out.println(pstmt.toString());
-
-                            pstmt.execute();
-
-                            return true;
-                        } catch (SQLException e) {
-                            System.out.println("Se produjo un error al intentar actualizar el siguiente registro: " + salon.toString());
-                            e.printStackTrace();
+                            if (pstmt != null) {
+                                pstmt.close();
+                            }
                         } catch (Exception e) {
                             e.printStackTrace();
-                        } finally {
-                            try {
-                                if (pstmt != null) {
-                                    pstmt.close();
-                                }
-                            } catch (Exception e) {
-                                e.printStackTrace();
-                            }
                         }
-                    } else {
-                        Alert alert = new Alert(Alert.AlertType.WARNING);
-                        alert.setTitle("Control academico");
-                        alert.setHeaderText(null);
-                        alert.setContentText("Tipo de dato no valido");
-                        alert.show();
                     }
                 } else {
                     Alert alert = new Alert(Alert.AlertType.WARNING);
                     alert.setTitle("Control academico");
+                    Stage stageAlert = (Stage) alert.getDialogPane().getScene().getWindow();
+                    stageAlert.getIcons().add(new Image("org/in5bm/jsaldana_lperez/resources/images/informacion.png"));
                     alert.setHeaderText(null);
                     alert.setContentText("Limite de caracteres excedido");
                     alert.show();
@@ -521,6 +520,8 @@ public class SalonesController implements Initializable {
             } else {
                 Alert alert = new Alert(Alert.AlertType.WARNING);
                 alert.setTitle("Control academico");
+                Stage stageAlert = (Stage) alert.getDialogPane().getScene().getWindow();
+                stageAlert.getIcons().add(new Image("org/in5bm/jsaldana_lperez/resources/images/informacion.png"));
                 alert.setHeaderText(null);
                 alert.setContentText("Verifique que los campos no contengan un espacio al inicio");
                 alert.show();
@@ -528,6 +529,8 @@ public class SalonesController implements Initializable {
         } else {
             Alert alert = new Alert(Alert.AlertType.WARNING);
             alert.setTitle("Control academico");
+            Stage stageAlert = (Stage) alert.getDialogPane().getScene().getWindow();
+            stageAlert.getIcons().add(new Image("org/in5bm/jsaldana_lperez/resources/images/informacion.png"));
             alert.setHeaderText(null);
             alert.setContentText("Antes de continuar rellene todos los campos");
             alert.show();
@@ -564,6 +567,8 @@ public class SalonesController implements Initializable {
                         limpiarCampos();
                         Alert alert = new Alert(Alert.AlertType.INFORMATION);
                         alert.setTitle("Control academico");
+                        Stage stageAlert = (Stage) alert.getDialogPane().getScene().getWindow();
+                        stageAlert.getIcons().add(new Image("org/in5bm/jsaldana_lperez/resources/images/informacion.png"));
                         alert.setHeaderText(null);
                         alert.setContentText("Registro eliminado exitosamente");
                         alert.show();
@@ -571,6 +576,8 @@ public class SalonesController implements Initializable {
                 } else {
                     Alert alert = new Alert(Alert.AlertType.WARNING);
                     alert.setTitle("Control academico");
+                    Stage stageAlert = (Stage) alert.getDialogPane().getScene().getWindow();
+                    stageAlert.getIcons().add(new Image("org/in5bm/jsaldana_lperez/resources/images/informacion.png"));
                     alert.setHeaderText(null);
                     alert.setContentText("Antes de continuar selecciona un registro");
                     alert.show();

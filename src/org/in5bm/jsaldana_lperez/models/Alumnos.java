@@ -110,6 +110,5 @@ public class Alumnos {
     @Override
     public String toString() {
         return carne + " | " + nombre1 + " | " + apellido1;
-    }
-    
+    } 
 }

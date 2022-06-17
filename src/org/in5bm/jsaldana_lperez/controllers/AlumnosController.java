@@ -38,6 +38,7 @@ import javafx.scene.image.ImageView;
 public class AlumnosController implements Initializable {
 
     private final String PAQUETE_IMAGE = "org/in5bm/jsaldana_lperez/resources/images/";
+    private final String TITULO_ALERT = "Control Académico Kinal";
 
     private enum Operacion {
         NINGUNO, GUARDAR, MODIFICAR
@@ -149,6 +150,8 @@ public class AlumnosController implements Initializable {
 
             Alert confirm = new Alert(Alert.AlertType.CONFIRMATION);
             confirm.setTitle("Control Académico Kinal");
+            Stage stageAlert = (Stage) confirm.getDialogPane().getScene().getWindow();
+            stageAlert.getIcons().add(new Image(PAQUETE_IMAGE + "informacion.png"));
             confirm.setHeaderText(null);
             confirm.setContentText("Esta apunto de eliminar el registro con los siguientes datos: "
                     + "\n" + alumno.getCarne() + " || " + alumno.getNombre2() + " || " + alumno.getApellido1()
@@ -371,6 +374,8 @@ public class AlumnosController implements Initializable {
                 } else {
                     Alert alert = new Alert(Alert.AlertType.WARNING);
                     alert.setTitle("Control academico");
+                    Stage stageAlert = (Stage) alert.getDialogPane().getScene().getWindow();
+                    stageAlert.getIcons().add(new Image(PAQUETE_IMAGE + "informacion.png"));
                     alert.setHeaderText(null);
                     alert.setContentText("Limite de caracteres excedido");
                     alert.show();
@@ -378,6 +383,8 @@ public class AlumnosController implements Initializable {
             } else {
                 Alert alert = new Alert(Alert.AlertType.WARNING);
                 alert.setTitle("Control academico");
+                Stage stageAlert = (Stage) alert.getDialogPane().getScene().getWindow();
+                stageAlert.getIcons().add(new Image(PAQUETE_IMAGE + "informacion.png"));
                 alert.setHeaderText(null);
                 alert.setContentText("Verifique que los campos no contengan un espacio al inicio");
                 alert.show();
@@ -385,6 +392,8 @@ public class AlumnosController implements Initializable {
         } else {
             Alert alert = new Alert(Alert.AlertType.WARNING);
             alert.setTitle("Control academico");
+            Stage stageAlert = (Stage) alert.getDialogPane().getScene().getWindow();
+            stageAlert.getIcons().add(new Image(PAQUETE_IMAGE + "informacion.png"));
             alert.setHeaderText(null);
             alert.setContentText("Antes de continuar rellene todos los campos");
             alert.show();
@@ -415,6 +424,8 @@ public class AlumnosController implements Initializable {
                 } else {
                     Alert alert = new Alert(Alert.AlertType.WARNING);
                     alert.setTitle("Control academico");
+                    Stage stageAlert = (Stage) alert.getDialogPane().getScene().getWindow();
+                    stageAlert.getIcons().add(new Image(PAQUETE_IMAGE + "informacion.png"));
                     alert.setHeaderText(null);
                     alert.setContentText("Antes de continuar selecciona un registro");
                     alert.show();
@@ -479,47 +490,49 @@ public class AlumnosController implements Initializable {
             if (!(txtCarne.getText().charAt(0) == ' ' || txtNombre1.getText().charAt(0) == ' ' || txtApellido1.getText().charAt(0) == ' ')) {
                 if (!(txtCarne.getText().length() >= 8 || txtNombre1.getText().length() >= 16 || txtNombre2.getText().length() >= 16
                         || txtNombre3.getText().length() >= 16 || txtApellido1.getText().length() >= 16 || txtApellido2.getText().length() >= 16)) {
-                        Alumnos alumno = new Alumnos();
-                        alumno.setCarne(txtCarne.getText());
-                        alumno.setNombre1(txtNombre1.getText());
-                        alumno.setNombre2(txtNombre2.getText());
-                        alumno.setNombre3(txtNombre3.getText());
-                        alumno.setApellido1(txtApellido1.getText());
-                        alumno.setApellido2(txtApellido2.getText());
+                    Alumnos alumno = new Alumnos();
+                    alumno.setCarne(txtCarne.getText());
+                    alumno.setNombre1(txtNombre1.getText());
+                    alumno.setNombre2(txtNombre2.getText());
+                    alumno.setNombre3(txtNombre3.getText());
+                    alumno.setApellido1(txtApellido1.getText());
+                    alumno.setApellido2(txtApellido2.getText());
 
-                        PreparedStatement pstmt = null;
+                    PreparedStatement pstmt = null;
 
+                    try {
+                        pstmt = Conexion.getInstance().getConexion().prepareCall("{Call sp_alumnos_update(?, ?, ?, ?, ?, ?)}");
+                        pstmt.setString(1, alumno.getCarne());
+                        pstmt.setString(2, alumno.getNombre1());
+                        pstmt.setString(3, alumno.getNombre2());
+                        pstmt.setString(4, alumno.getNombre3());
+                        pstmt.setString(5, alumno.getApellido1());
+                        pstmt.setString(6, alumno.getApellido2());
+
+                        System.out.println(pstmt.toString());
+
+                        pstmt.execute();
+
+                        return true;
+                    } catch (SQLException e) {
+                        System.out.println("Se produjo un error al intentar actualizar el siguiente registro: " + alumno.toString());
+                        e.printStackTrace();
+                    } catch (Exception e) {
+                        e.printStackTrace();
+                    } finally {
                         try {
-                            pstmt = Conexion.getInstance().getConexion().prepareCall("{Call sp_alumnos_update(?, ?, ?, ?, ?, ?)}");
-                            pstmt.setString(1, alumno.getCarne());
-                            pstmt.setString(2, alumno.getNombre1());
-                            pstmt.setString(3, alumno.getNombre2());
-                            pstmt.setString(4, alumno.getNombre3());
-                            pstmt.setString(5, alumno.getApellido1());
-                            pstmt.setString(6, alumno.getApellido2());
-
-                            System.out.println(pstmt.toString());
-
-                            pstmt.execute();
-
-                            return true;
-                        } catch (SQLException e) {
-                            System.out.println("Se produjo un error al intentar actualizar el siguiente registro: " + alumno.toString());
-                            e.printStackTrace();
+                            if (pstmt != null) {
+                                pstmt.close();
+                            }
                         } catch (Exception e) {
                             e.printStackTrace();
-                        } finally {
-                            try {
-                                if (pstmt != null) {
-                                    pstmt.close();
-                                }
-                            } catch (Exception e) {
-                                e.printStackTrace();
-                            }
                         }
+                    }
                 } else {
                     Alert alert = new Alert(Alert.AlertType.WARNING);
                     alert.setTitle("Control academico");
+                    Stage stageAlert = (Stage) alert.getDialogPane().getScene().getWindow();
+                    stageAlert.getIcons().add(new Image(PAQUETE_IMAGE + "informacion.png"));
                     alert.setHeaderText(null);
                     alert.setContentText("Limite de caracteres excedido");
                     alert.show();
@@ -527,6 +540,8 @@ public class AlumnosController implements Initializable {
             } else {
                 Alert alert = new Alert(Alert.AlertType.WARNING);
                 alert.setTitle("Control academico");
+                Stage stageAlert = (Stage) alert.getDialogPane().getScene().getWindow();
+                stageAlert.getIcons().add(new Image(PAQUETE_IMAGE + "informacion.png"));
                 alert.setHeaderText(null);
                 alert.setContentText("Limite de caracteres excedido");
                 alert.show();
@@ -534,6 +549,8 @@ public class AlumnosController implements Initializable {
         } else {
             Alert alert = new Alert(Alert.AlertType.WARNING);
             alert.setTitle("Control academico");
+            Stage stageAlert = (Stage) alert.getDialogPane().getScene().getWindow();
+            stageAlert.getIcons().add(new Image(PAQUETE_IMAGE + "informacion.png"));
             alert.setHeaderText(null);
             alert.setContentText("Verifique que los campos no contengan un espacio al inicio");
             alert.show();
@@ -570,6 +587,8 @@ public class AlumnosController implements Initializable {
                         limpiarCampos();
                         Alert alert = new Alert(Alert.AlertType.INFORMATION);
                         alert.setTitle("Control academico");
+                        Stage stageAlert = (Stage) alert.getDialogPane().getScene().getWindow();
+                        stageAlert.getIcons().add(new Image(PAQUETE_IMAGE + "informacion.png"));
                         alert.setHeaderText(null);
                         alert.setContentText("Registro eliminado exitosamente");
                         alert.show();
@@ -577,6 +596,8 @@ public class AlumnosController implements Initializable {
                 } else {
                     Alert alert = new Alert(Alert.AlertType.WARNING);
                     alert.setTitle("Control academico");
+                    Stage stageAlert = (Stage) alert.getDialogPane().getScene().getWindow();
+                    stageAlert.getIcons().add(new Image(PAQUETE_IMAGE + "informacion.png"));
                     alert.setHeaderText(null);
                     alert.setContentText("Antes de continuar selecciona un registro");
                     alert.show();
